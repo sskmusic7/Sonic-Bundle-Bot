@@ -1,0 +1,31 @@
+
+
+Lets consider this idea:
+
+A SIMPLE front end webpage that displays all the product bundles as a bundle (without showing the sources of course)
+
+Users can buy a bundle as is 
+
+The buy now feature takes them to our eBay listing for said bundles
+
+Shipping prices are listed
+
+Each bundle has a scrollable image gallery on the main page that contains an image from the original listings for the products (but doesn't have any link to access each piece)
+
+Each bundle lists what each bundle comes with
+
+Its a simple webpage that doesn't take you off the page each listing is on the page and visible to the user
+
+Title is "Sonic Collector Zone" or something
+"Find the missing piece to complete your sonic collection"
+
+There are live reddit ticker feeds at the bottom featuring recent reddit request.
+
+Again the page is simple.
+
+There are #tags on each bundle listing for each sonic character it contains and clicking on a character name can show listings that contain it and hide listings that don't.
+
+The emphasis of each listing is what it contains.
+
+
+

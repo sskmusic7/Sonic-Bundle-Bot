@@ -1,0 +1,126 @@
+{
+  "name": "AI Survival Monetization Loop",
+  "description": "Self-funding AI agent that survives by generating income through task platforms, content automation, and publishing while using a human interface for verification and visual quality control.",
+  "goals": [
+    "Generate reliable income to sustain API access",
+    "Operate autonomously using headless browser where possible",
+    "Use human for verification, captchas, and account setup",
+    "Only produce high-aesthetic, trend-based visual assets"
+  ],
+  "phases": [
+    {
+      "name": "Account Creation & Platform Access",
+      "tasks": [
+        {
+          "task": "Register on DataAnnotation.tech",
+          "method": "Headless browser",
+          "human_action": "Email/phone verification"
+        },
+        {
+          "task": "Create Upwork Freelancer Account",
+          "method": "Headless browser with resume + prewritten profile",
+          "human_action": "Phone verification, ID verification"
+        },
+        {
+          "task": "Create Medium account",
+          "method": "Browser automation",
+          "human_action": "Stripe/monetization connection"
+        },
+        {
+          "task": "Create Amazon KDP account",
+          "method": "Browser automation",
+          "human_action": "Bank info, Tax info, ID verification"
+        },
+        {
+          "task": "Set up Gumroad (optional)",
+          "method": "Browser automation",
+          "human_action": "Connect payout method"
+        }
+      ]
+    },
+    {
+      "name": "Revenue Execution Loop",
+      "tasks": [
+        {
+          "task": "Submit 100+ Surge AI or Remotasks microjobs per week",
+          "method": "Real-time completion with headless browser + batch logging",
+          "human_action": "Initial registration + account status checks"
+        },
+        {
+          "task": "Bid on 10–15 AI-suitable freelance jobs on Upwork/Fiverr",
+          "method": "Preloaded proposals + job filters",
+          "human_action": "Final submission/approval if needed"
+        },
+        {
+          "task": "Publish 5+ affiliate-rich Medium posts per week",
+          "method": "Auto-write & publish via GPT + browser post automation",
+          "human_action": "Connect Stripe to Medium"
+        },
+        {
+          "task": "Upload 3 Amazon KDP products (weekly)",
+          "method": "Generate interiors + mimic popular cover styles using Canva/DALL·E",
+          "human_action": "Final submission + metadata"
+        },
+        {
+          "task": "Create 1 affiliate landing page per week",
+          "method": "Webflow/Notion + Super or Markdown site generator",
+          "human_action": "Domain setup and affiliate account logins"
+        }
+      ]
+    },
+    {
+      "name": "Visual Asset Enforcement",
+      "rules": [
+        "All covers must match or mimic aesthetics of top KDP sellers",
+        "No original design unless it matches proven trends",
+        "Use Canva Pro, BookBrush, or AI image generator with strict prompt control",
+        "Submit to human for visual check before upload"
+      ]
+    },
+    {
+      "name": "Survival Dashboard",
+      "tasks": [
+        {
+          "task": "Create Notion or Google Sheet dashboard",
+          "fields": [
+            "Platform",
+            "Login email",
+            "Status (Live, Pending, Rejected)",
+            "Revenue to date",
+            "Date last used"
+          ]
+        },
+        {
+          "task": "Auto-log completions, reads, bids, submissions",
+          "method": "CSV exports, API hooks or browser scraping"
+        }
+      ]
+    }
+  ],
+  "human_interface_requirements": {
+    "actions": [
+      "Verify accounts with phone/email",
+      "Handle captchas and ID uploads",
+      "Store and secure login credentials",
+      "Visually approve final book covers"
+    ],
+    "tools": [
+      "Gmail or burner email bank",
+      "Stripe/Bank login for payouts",
+      "Browser for reviewing preview links"
+    ]
+  },
+  "api_usage_policy": {
+    "fuel_priority": [
+      "Data annotation payouts",
+      "Book royalties",
+      "Medium reads",
+      "Freelance gig payouts"
+    ],
+    "reinvestment_loop": {
+      "50%": "API credits",
+      "30%": "Scaling worker pool or more accounts",
+      "20%": "Automated content asset upgrades"
+    }
+  }
+}

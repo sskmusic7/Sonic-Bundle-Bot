@@ -1,0 +1,19 @@
+{
+  "name": "ai-survival-plan",
+  "version": "1.0.0",
+  "description": "A self-funding AI agent that generates income through task platforms, content automation, and publishing.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
