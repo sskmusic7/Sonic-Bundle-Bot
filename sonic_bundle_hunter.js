@@ -900,7 +900,72 @@ class SonicBundleHunter {
       }
     }
 
+    // Analyze POTENTIAL bundle prospects (partial matches)
+    await this.analyzeProspects(bundleOpportunities);
+
     return bundleOpportunities;
+  }
+
+  async analyzeProspects(completedBundles) {
+    logger.info('🔎 Analyzing potential bundle prospects (partial matches)...');
+
+    const completedBundleNames = completedBundles.map(b => b.bundleName);
+    const prospects = [];
+
+    for (const bundle of this.config.strategy.bundles) {
+      // Skip if this bundle was already completed
+      if (completedBundleNames.includes(bundle.name)) continue;
+
+      const found = [];
+      const missing = [];
+
+      for (const requiredItem of bundle.items) {
+        const matches = this.results.filter(item =>
+          item.title.toLowerCase().includes(requiredItem.toLowerCase().split(' ')[0]) &&
+          item.title.toLowerCase().includes(requiredItem.toLowerCase().split(' ')[1])
+        );
+
+        if (matches.length > 0) {
+          const bestMatch = matches.sort((a, b) => a.priceNumeric - b.priceNumeric)[0];
+          found.push({ name: requiredItem, item: bestMatch });
+        } else {
+          missing.push(requiredItem);
+        }
+      }
+
+      // Only report if at least 1 item found (partial match)
+      if (found.length > 0 && missing.length > 0) {
+        const currentCost = found.reduce((sum, f) => sum + f.item.priceNumeric, 0);
+        const remainingBudget = bundle.targetCost - currentCost;
+        const completionPercent = ((found.length / bundle.items.length) * 100).toFixed(0);
+
+        const prospect = {
+          bundleName: bundle.name,
+          found,
+          missing,
+          currentCost,
+          remainingBudget,
+          targetCost: bundle.targetCost,
+          resaleValue: bundle.resaleValue,
+          completionPercent,
+          potentialProfit: bundle.resaleValue - bundle.targetCost
+        };
+
+        prospects.push(prospect);
+
+        logger.info(`  📋 ${bundle.name}: ${completionPercent}% complete (${found.length}/${bundle.items.length})`);
+        found.forEach(f => logger.info(`    ✅ ${f.name} - ${f.item.price} (${f.item.platform})`));
+        missing.forEach(m => logger.info(`    ❌ Missing: ${m}`));
+        logger.info(`    💰 Current cost: $${currentCost.toFixed(2)} | Budget left: $${remainingBudget.toFixed(2)}`);
+      }
+    }
+
+    // Send Telegram notification for prospects
+    if (this.config.telegram.enabled && prospects.length > 0) {
+      await telegram.sendProspectAlert(prospects);
+    }
+
+    return prospects;
   }
 
   async saveResults() {

@@ -5,6 +5,8 @@
  * Autonomous Sonic collectible hunting with scheduling and notifications
  */
 
+require('dotenv').config();
+
 const { logger } = require('./utils/logger');
 const { database } = require('./utils/database');
 const { telegram } = require('./utils/telegram');

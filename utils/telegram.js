@@ -134,6 +134,39 @@ ${platformBreakdown}
     await this.sendMessage(message);
   }
 
+  async sendProspectAlert(prospects) {
+    if (!this.enabled) return;
+
+    let message = `🎯 *BUNDLE PROSPECTS* (Partial Matches)\n`;
+
+    for (const p of prospects) {
+      const foundList = p.found.map(f =>
+        `  ✅ ${f.name} — ${f.item.price} (${f.item.platform})`
+      ).join('\n');
+      const missingList = p.missing.map(m => `  ❌ ${m}`).join('\n');
+
+      message += `
+━━━━━━━━━━━━━━━━━━━━
+📦 *${p.bundleName}*
+📊 ${p.completionPercent}% complete (${p.found.length}/${p.found.length + p.missing.length} items)
+
+*Found:*
+${foundList}
+
+*Still Need:*
+${missingList}
+
+💰 Spent so far: $${p.currentCost.toFixed(2)}
+💵 Budget remaining: $${p.remainingBudget.toFixed(2)}
+📈 Potential profit if completed: $${p.potentialProfit.toFixed(2)}
+`;
+    }
+
+    message += `\n📅 ${new Date().toLocaleString()}`;
+
+    await this.sendMessage(message);
+  }
+
   async sendErrorAlert(error) {
     if (!this.enabled) return;
 
