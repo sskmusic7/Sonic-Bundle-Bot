@@ -180,6 +180,60 @@ module.exports = {
     ]
   },
 
+  // ==================== GEMINI AI ====================
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
+    model: 'gemini-2.0-flash',
+    imageModel: 'gemini-3.1-flash-image-preview'
+  },
+
+  // ==================== EBAY SELL API ====================
+  ebaySell: {
+    redirectUri: 'http://localhost:3000/callback',
+    scopes: ['https://api.ebay.com/oauth/api_scope/sell.inventory', 'https://api.ebay.com/oauth/api_scope/sell.fulfillment', 'https://api.ebay.com/oauth/api_scope/sell.account'],
+    callbackPort: 3000,
+    callbackTimeout: 300000  // 5 minutes
+  },
+
+  // ==================== SHRINE PIPELINE ====================
+  shrine: {
+    enabled: true,
+    characters: [
+      'sonic', 'shadow', 'tails', 'knuckles', 'amy rose', 'silver',
+      'metal sonic', 'cream', 'rouge', 'eggman', 'blaze', 'big the cat'
+    ],
+    categories: ['plush', 'action figure', 'keychain pin accessory'],
+    searchTemplates: [
+      'Sonic {character} {category} NEW -lot -custom -bootleg',
+      '{character} hedgehog {category} official -lot -custom',
+      'SEGA {character} {category} -lot -bootleg'
+    ],
+    defaultMultiplier: 1.4,
+    anniversaryMultiplier: 1.6,
+    ebayFeePct: 0.13,
+    minMarginPct: 0.25,
+    minListPrice: 40,
+    maxComponentPrice: 50,
+    minSellerScore: 95,
+    preferMultiQty: true,
+    minComponentsForBundle: 2,
+    maxComponentsPerBundle: 4,
+    hotTargets: {
+      'cream': { multiplier: 1.5, note: '5-year resale high' },
+      'metal sonic': { multiplier: 1.5, note: 'Badnik collector demand' },
+      '35th anniversary': { multiplier: 1.6, note: 'FOMO pricing' },
+      'team rose': { multiplier: 1.5, note: 'Amy + Cream + Big set premium' }
+    },
+    agentIntervals: {
+      sourcer: 4 * 60 * 60 * 1000,     // 4 hours
+      validator: 30 * 60 * 1000,         // 30 minutes
+      bundler: 2 * 60 * 60 * 1000,      // 2 hours
+      creative: 60 * 60 * 1000,          // 1 hour
+      lister: 60 * 60 * 1000,           // 1 hour
+      guardian: 10 * 60 * 1000           // 10 minutes
+    }
+  },
+
   // ==================== PLATFORM SETTINGS ====================
   platforms: {
     ebay: {

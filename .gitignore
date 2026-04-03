@@ -21,5 +21,11 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Data (SQLite databases)
+data/
+
+# Logs directory
+logs/
+
 # Results (optional - uncomment if you don't want to track results)
 # sonic_results/
