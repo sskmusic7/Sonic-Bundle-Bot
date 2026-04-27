@@ -182,11 +182,15 @@ function bundlesToRows(bundles) {
     // Components summary
     const components = b.components.map(c => c.title).join(', ');
 
+    // GitHub raw URL for hero image (clickable in Sheets)
+    const imageUrl = `https://raw.githubusercontent.com/sskmusic7/Sonic-Bundle-Bot/main/data/shrine-images/shrine-${b.id}.png`;
+    const imageLink = `=HYPERLINK("${imageUrl}", "View Image")`;
+
     return [
       b.id,
       name,
       b.target_character,
-      b.hero_image_path || `data/shrine-images/shrine-${b.id}.png`,
+      imageLink,
       totalCost,
       listPrice,
       margin,
