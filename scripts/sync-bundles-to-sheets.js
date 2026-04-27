@@ -279,7 +279,7 @@ async function writeToSheet(authClient, rows) {
     await sheets.spreadsheets.values.update({
       spreadsheetId: CONFIG.SHEET_ID,
       range: `${CONFIG.SHEET_NAME}!A1`,
-      valueInputOption: 'RAW',
+      valueInputOption: 'USER_ENTERED', // Allows formulas like HYPERLINK to work
       resource: { values: rows },
     });
 
