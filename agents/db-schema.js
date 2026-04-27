@@ -64,7 +64,10 @@ function migrateShrineTables(db) {
 
     CREATE INDEX IF NOT EXISTS idx_sourced_validation ON sourced_items(validation_status);
     CREATE INDEX IF NOT EXISTS idx_sourced_character ON sourced_items(character);
+    CREATE INDEX IF NOT EXISTS idx_sourced_price ON sourced_items(price);
+    CREATE INDEX IF NOT EXISTS idx_sourced_category ON sourced_items(category);
     CREATE INDEX IF NOT EXISTS idx_shrine_status ON shrine_bundles(status);
+    CREATE INDEX IF NOT EXISTS idx_shrine_target ON shrine_bundles(target_character);
     CREATE INDEX IF NOT EXISTS idx_components_bundle ON shrine_components(bundle_id);
     CREATE INDEX IF NOT EXISTS idx_agent_runs_name ON agent_runs(agent_name);
   `);

@@ -5,17 +5,51 @@
 
 'use strict';
 
+require('dotenv').config();
 const http = require('http');
 const axios = require('axios');
+const crypto = require('crypto');
+const path = require('path');
 const config = require('./config');
 const Database = require('better-sqlite3');
 
-const DB_PATH = './data/sonic_tracker.db';
+const DB_PATH = path.resolve(__dirname, './data/sonic_tracker.db');
 
 const EBAY_APP_ID = process.env.EBAY_APP_ID || '';
 const EBAY_CERT_ID = process.env.EBAY_CERT_ID || '';
 const EBAY_AUTH_BASE = 'https://auth.ebay.com/oauth2';
 const EBAY_TOKEN_URL = 'https://api.ebay.com/identity/v1/oauth2/token';
+const TOKEN_ENCRYPTION_KEY = process.env.TOKEN_ENCRYPTION_KEY || null;
+
+// ── Token Encryption (Optional) ──────────────────────────────────────────
+
+function encryptToken(text) {
+  if (!TOKEN_ENCRYPTION_KEY) return text; // No encryption if key not set
+  try {
+    const key = crypto.createHash('sha256').update(TOKEN_ENCRYPTION_KEY).digest();
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
+  } catch (err) {
+    console.error('Encryption failed, storing plaintext:', err.message);
+    return text;
+  }
+}
+
+function decryptToken(text) {
+  if (!TOKEN_ENCRYPTION_KEY) return text;
+  if (!text || !text.includes(':')) return text; // Already plaintext
+  try {
+    const [ivHex, encrypted] = text.split(':');
+    const key = crypto.createHash('sha256').update(TOKEN_ENCRYPTION_KEY).digest();
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivHex, 'hex'));
+    return decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
+  } catch (err) {
+    console.error('Decryption failed, returning raw:', err.message);
+    return text;
+  }
+}
 
 // ── Authorization URL ────────────────────────────────────────────────────
 
@@ -134,11 +168,15 @@ async function refreshAccessToken(refreshToken) {
 
 function storeTokens(db, accessToken, refreshToken, expiresIn) {
   const expiresAt = Math.floor(Date.now() / 1000) + expiresIn - 60; // 60s buffer
+  const encryptedAccess = encryptToken(accessToken);
+  const encryptedRefresh = encryptToken(refreshToken);
 
   db.prepare(`
     INSERT OR REPLACE INTO auth_tokens (id, access_token, refresh_token, expires_at)
     VALUES (1, ?, ?, ?)
-  `).run(accessToken, refreshToken, expiresAt);
+  `).run(encryptedAccess, encryptedRefresh, expiresAt);
+
+  console.log('Tokens stored' + (TOKEN_ENCRYPTION_KEY ? ' (encrypted)' : ' (plaintext)'));
 }
 
 // ── Get valid user token (auto-refresh if expired) ───────────────────────
@@ -150,16 +188,18 @@ async function getUserToken(db) {
     return null; // No tokens stored — user needs to run /ebayauth
   }
 
+  const accessToken = decryptToken(row.access_token);
+  const refreshToken = decryptToken(row.refresh_token);
   const now = Math.floor(Date.now() / 1000);
 
   if (now < row.expires_at) {
-    return row.access_token;
+    return accessToken;
   }
 
   // Token expired — try refresh
   try {
-    const refreshed = await refreshAccessToken(row.refresh_token);
-    storeTokens(db, refreshed.accessToken, row.refresh_token, refreshed.expiresIn);
+    const refreshed = await refreshAccessToken(refreshToken);
+    storeTokens(db, refreshed.accessToken, refreshToken, refreshed.expiresIn);
     return refreshed.accessToken;
   } catch (err) {
     console.error('Token refresh failed:', err.response?.data || err.message);

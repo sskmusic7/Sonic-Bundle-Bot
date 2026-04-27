@@ -195,6 +195,15 @@ module.exports = {
     callbackTimeout: 300000  // 5 minutes
   },
 
+  // ==================== EBAY BUSINESS POLICIES ====================
+  ebayPolicies: {
+    fulfillmentPolicyId: process.env.EBAY_FULFILLMENT_POLICY_ID || null,
+    paymentPolicyId: process.env.EBAY_PAYMENT_POLICY_ID || null,
+    returnPolicyId: process.env.EBAY_RETURN_POLICY_ID || null,
+    merchantLocationKey: process.env.EBAY_MERCHANT_LOCATION_KEY || null,
+    categoryId: '158769', // Collectible Plush
+  },
+
   // ==================== SHRINE PIPELINE ====================
   shrine: {
     enabled: true,
@@ -225,12 +234,12 @@ module.exports = {
       'team rose': { multiplier: 1.5, note: 'Amy + Cream + Big set premium' }
     },
     agentIntervals: {
-      sourcer: 4 * 60 * 60 * 1000,     // 4 hours
-      validator: 30 * 60 * 1000,         // 30 minutes
-      bundler: 2 * 60 * 60 * 1000,      // 2 hours
-      creative: 60 * 60 * 1000,          // 1 hour
-      lister: 60 * 60 * 1000,           // 1 hour
-      guardian: 10 * 60 * 1000           // 10 minutes
+      sourcer: 6 * 60 * 60 * 1000,     // 6 hours
+      validator: 2 * 60 * 60 * 1000,    // 2 hours
+      bundler: 6 * 60 * 60 * 1000,      // 6 hours
+      creative: 6 * 60 * 60 * 1000,     // 6 hours
+      lister: 6 * 60 * 60 * 1000,       // 6 hours
+      guardian: 60 * 60 * 1000           // 1 hour
     }
   },
 

@@ -34,8 +34,10 @@ async function run(db, { notify, notifyPhoto }) {
   }
 
   if (!userToken) {
-    await notify('*LISTER:* No eBay auth token. Run /ebayauth to authorize.');
-    return { processed: 0, error: 'No auth token' };
+    const errorMsg = 'LISTER BLOCKED: No eBay auth token — run /ebayauth';
+    console.error(errorMsg);
+    await notify(`*${errorMsg}*`);
+    return { processed: 0, error: errorMsg };
   }
 
   let listed = 0;

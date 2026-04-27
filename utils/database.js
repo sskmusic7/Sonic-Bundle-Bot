@@ -1,3 +1,8 @@
+/**
+ * DEPRECATED: Legacy schema manager. Kept for read-only / migration paths.
+ * New code uses agents/db-schema.js (shrine tables).
+ * Do not add new tables here. Scheduled for removal in v5.0.
+ */
 const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');

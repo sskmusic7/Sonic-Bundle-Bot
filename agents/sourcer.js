@@ -170,7 +170,7 @@ async function run(db, { notify }) {
   }
 
   if (totalNew > 0) {
-    await notify(`*SOURCER:* Found ${totalNew} new items across ${queriesRun} searches`);
+    console.log(`Sourcer: Found ${totalNew} new items across ${queriesRun} searches`);
   }
 
   return { processed: totalNew, queries: queriesRun };

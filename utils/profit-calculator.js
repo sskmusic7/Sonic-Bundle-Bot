@@ -41,7 +41,7 @@ class ProfitCalculator {
       meetsTargetMargin: parseFloat(margin) >= this.profit.targetProfitMargin
     };
 
-    // Log the profit analysis
+    // Log profit analysis
     logProfit(item, analysis);
 
     return analysis;

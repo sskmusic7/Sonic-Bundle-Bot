@@ -107,17 +107,27 @@ class AgentRunner {
     const config = require('../config');
     const intervalConfig = config.shrine?.agentIntervals || {};
 
-    for (const [name, agent] of Object.entries(this.agents)) {
+    // Agent order with stagger times (minutes)
+    const agentOrder = [
+      { name: 'sourcer', stagger: 0 },
+      { name: 'guardian', stagger: 5 },
+      { name: 'validator', stagger: 10 },
+      { name: 'bundler', stagger: 20 },
+      { name: 'creative', stagger: 30 },
+      { name: 'lister', stagger: 40 }
+    ];
+
+    for (const { name, stagger } of agentOrder) {
+      const agent = this.agents[name];
+      if (!agent) continue;
+
       const interval = intervalConfig[name] || agent.interval || 3600000;
       this.paused[name] = false;
 
-      // Run once on startup (staggered by 30s per agent to avoid API flooding)
-      const stagger = Object.keys(this.agents).indexOf(name) * 30000;
-      setTimeout(() => this.runAgent(name), 5000 + stagger);
-
-      // Then run on interval
+      const staggerMs = stagger * 60 * 1000;
+      setTimeout(() => this.runAgent(name), 5000 + staggerMs);
       this.intervals[name] = setInterval(() => this.runAgent(name), interval);
-      console.log(`Agent ${name}: started (every ${Math.round(interval / 60000)}m)`);
+      console.log(`Agent ${name}: every ${Math.round(interval/60000)}m, stagger: ${stagger}m`);
     }
   }
 

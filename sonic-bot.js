@@ -6,10 +6,11 @@
 
 'use strict';
 
-require('dotenv').config();
+require('dotenv').config({ override: true });
 const TelegramBot = require('node-telegram-bot-api');
 const cron = require('node-cron');
 const config = require('./config');
+const fs = require('fs');
 
 const Database = require('better-sqlite3');
 
@@ -18,6 +19,48 @@ const { AgentRunner } = require('./agents/runner');
 const BOT_TOKEN = config.telegram.botToken;
 const CHAT_ID   = String(config.telegram.chatId);
 const DB_PATH   = './data/sonic_tracker.db';
+const LOCK_FILE = './data/bot.lock';
+
+// ── Single-Instance Lock ───────────────────────────────────────────────────
+
+function acquireLock() {
+  if (fs.existsSync(LOCK_FILE)) {
+    const lockData = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
+    try {
+      process.kill(lockData.pid, 0); // Check if PID exists
+      console.error(`Bot already running (PID ${lockData.pid}). Exiting.`);
+      process.exit(1);
+    } catch {
+      console.log(`Removing stale lock from PID ${lockData.pid}`);
+      fs.unlinkSync(LOCK_FILE);
+    }
+  }
+  fs.writeFileSync(LOCK_FILE, JSON.stringify({pid: process.pid, startedAt: new Date().toISOString()}));
+  console.log(`Lock acquired (PID ${process.pid})`);
+}
+
+function releaseLock() {
+  if (fs.existsSync(LOCK_FILE)) {
+    fs.unlinkSync(LOCK_FILE);
+    console.log('Lock released');
+  }
+}
+
+// Acquire lock before starting bot
+acquireLock();
+
+// Signal handlers for graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\nReceived SIGINT, shutting down...');
+  releaseLock();
+  process.exit(0);
+});
+process.on('SIGTERM', () => {
+  console.log('\nReceived SIGTERM, shutting down...');
+  releaseLock();
+  process.exit(0);
+});
+process.on('exit', releaseLock);
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 

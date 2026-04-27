@@ -11,6 +11,23 @@ const { generateListingCopy, generateBundleArt } = require('./sonic-ai');
 
 const EBAY_API = 'https://api.ebay.com';
 
+// ── Retry helper for API calls ───────────────────────────────────────────
+
+async function retryAxios(fn, maxRetries = 3, baseDelay = 2000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const status = err.response?.status;
+      const isRetryable = status >= 500 || status === 429;
+      if (!isRetryable || attempt === maxRetries) throw err;
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      console.log(`Attempt ${attempt} failed (${status}), retrying in ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+}
+
 // ── Create/update inventory item ─────────────────────────────────────────
 
 async function createInventoryItem(sku, listingCopy, imageUrls, token) {
@@ -46,13 +63,21 @@ async function createInventoryItem(sku, listingCopy, imageUrls, token) {
 // ── Create offer ─────────────────────────────────────────────────────────
 
 async function createOffer(sku, price, token) {
-  const url = `${EBAY_API}/sell/inventory/v1/offer`;
+  const config = require('./config');
+  const policies = config.ebayPolicies;
+
+  // Validate policies configured
+  if (!policies.fulfillmentPolicyId || !policies.paymentPolicyId || !policies.returnPolicyId) {
+    throw new Error('eBay business policies not configured in .env');
+  }
+  if (!policies.merchantLocationKey) {
+    throw new Error('Merchant location not configured in .env');
+  }
 
   const payload = {
-    sku: sku,
+    sku,
     marketplaceId: 'EBAY_US',
     format: 'FIXED_PRICE',
-    listingDescription: '',  // Uses inventory item description
     availableQuantity: 1,
     pricingSummary: {
       price: {
@@ -60,24 +85,51 @@ async function createOffer(sku, price, token) {
         currency: 'USD'
       }
     },
-    categoryId: '158769',  // Collectible Plush Toys & Stuffed Animals
+    categoryId: policies.categoryId,
     listingPolicies: {
-      // These must be set up in eBay seller hub
-      // Will use default policies if available
+      fulfillmentPolicyId: policies.fulfillmentPolicyId,
+      paymentPolicyId: policies.paymentPolicyId,
+      returnPolicyId: policies.returnPolicyId
     },
-    merchantLocationKey: 'default'  // Must be created in seller account
+    merchantLocationKey: policies.merchantLocationKey
   };
 
-  const resp = await axios.post(url, payload, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'Content-Language': 'en-US'
-    },
-    timeout: 15000
-  });
+  try {
+    const resp = await retryAxios(() => axios.post(`${EBAY_API}/sell/inventory/v1/offer`, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 15000
+    }));
+    return resp.data.offerId;
+  } catch (err) {
+    // Handle 409 Conflict (SKU already exists)
+    if (err.response?.status === 409) {
+      console.log(`SKU ${sku} exists, retrieving offer...`);
+      const getResp = await axios.get(`${EBAY_API}/sell/inventory/v1/offer?sku=${sku}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        timeout: 10000
+      });
+      if (getResp.data.offers?.[0]) {
+        return getResp.data.offers[0].offerId;
+      }
 
-  return resp.data.offerId;
+      // Retry with new SKU
+      const newSku = sku + '-' + Date.now().toString(36).slice(-4);
+      console.log(`Retrying with new SKU: ${newSku}`);
+      payload.sku = newSku;
+      const retryResp = await retryAxios(() => axios.post(`${EBAY_API}/sell/inventory/v1/offer`, payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      }));
+      return retryResp.data.offerId;
+    }
+    throw err;
+  }
 }
 
 // ── Publish offer ────────────────────────────────────────────────────────
