@@ -21,8 +21,10 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Data (SQLite databases)
-data/
+# Data (SQLite databases and temp files)
+data/*
+# But allow shrine images for GitHub hosting
+!data/shrine-images/
 
 # Logs directory
 logs/
